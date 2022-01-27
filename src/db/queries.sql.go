@@ -143,6 +143,37 @@ func (q *Queries) GetBannedUsers(ctx context.Context) ([]uuid.UUID, error) {
 	return items, nil
 }
 
+const getFilterTemplates = `-- name: GetFilterTemplates :many
+SELECT id, filter_name, template_hash, created_at, updated_at
+FROM filter_templates
+`
+
+func (q *Queries) GetFilterTemplates(ctx context.Context) ([]FilterTemplate, error) {
+	rows, err := q.db.Query(ctx, getFilterTemplates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FilterTemplate
+	for rows.Next() {
+		var i FilterTemplate
+		if err := rows.Scan(
+			&i.ID,
+			&i.FilterName,
+			&i.TemplateHash,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getInstanceForUserAndFilter = `-- name: GetInstanceForUserAndFilter :one
 SELECT params
 FROM filter_instances
@@ -309,6 +340,56 @@ WHERE id = $1
 func (q *Queries) MarkListDownloaded(ctx context.Context, id int32) error {
 	_, err := q.db.Exec(ctx, markListDownloaded, id)
 	return err
+}
+
+const registerNewTemplate = `-- name: RegisterNewTemplate :one
+INSERT INTO filter_templates (filter_name, template_hash)
+VALUES ($1, $2)
+RETURNING id, filter_name, template_hash, created_at, updated_at
+`
+
+type RegisterNewTemplateParams struct {
+	FilterName   string
+	TemplateHash int32
+}
+
+func (q *Queries) RegisterNewTemplate(ctx context.Context, arg RegisterNewTemplateParams) (FilterTemplate, error) {
+	row := q.db.QueryRow(ctx, registerNewTemplate, arg.FilterName, arg.TemplateHash)
+	var i FilterTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.FilterName,
+		&i.TemplateHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const registerUpdatedTemplate = `-- name: RegisterUpdatedTemplate :one
+UPDATE filter_templates
+SET template_hash = $2,
+    updated_at    = NOW()
+WHERE id = $1
+RETURNING id, filter_name, template_hash, created_at, updated_at
+`
+
+type RegisterUpdatedTemplateParams struct {
+	ID           int32
+	TemplateHash int32
+}
+
+func (q *Queries) RegisterUpdatedTemplate(ctx context.Context, arg RegisterUpdatedTemplateParams) (FilterTemplate, error) {
+	row := q.db.QueryRow(ctx, registerUpdatedTemplate, arg.ID, arg.TemplateHash)
+	var i FilterTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.FilterName,
+		&i.TemplateHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const rotateListToken = `-- name: RotateListToken :exec

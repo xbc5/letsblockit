@@ -91,3 +91,19 @@ GROUP BY filter_name;
 SELECT user_id
 from banned_users
 WHERE lifted_at IS NULL;
+
+-- name: GetFilterTemplates :many
+SELECT *
+FROM filter_templates;
+
+-- name: RegisterNewTemplate :one
+INSERT INTO filter_templates (filter_name, template_hash)
+VALUES ($1, $2)
+RETURNING *;
+
+-- name: RegisterUpdatedTemplate :one
+UPDATE filter_templates
+SET template_hash = $2,
+    updated_at    = NOW()
+WHERE id = $1
+RETURNING *;

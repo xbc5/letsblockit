@@ -17,6 +17,7 @@ type Querier interface {
 	DeleteInstanceForUserAndFilter(ctx context.Context, arg DeleteInstanceForUserAndFilterParams) error
 	GetActiveFiltersForUser(ctx context.Context, userID uuid.UUID) ([]GetActiveFiltersForUserRow, error)
 	GetBannedUsers(ctx context.Context) ([]uuid.UUID, error)
+	GetFilterTemplates(ctx context.Context) ([]FilterTemplate, error)
 	GetInstanceForUserAndFilter(ctx context.Context, arg GetInstanceForUserAndFilterParams) (pgtype.JSONB, error)
 	GetInstanceStats(ctx context.Context) ([]GetInstanceStatsRow, error)
 	GetInstancesForList(ctx context.Context, filterListID int32) ([]GetInstancesForListRow, error)
@@ -25,6 +26,8 @@ type Querier interface {
 	GetStats(ctx context.Context) (GetStatsRow, error)
 	HasUserDownloadedList(ctx context.Context, userID uuid.UUID) (bool, error)
 	MarkListDownloaded(ctx context.Context, id int32) error
+	RegisterNewTemplate(ctx context.Context, arg RegisterNewTemplateParams) (FilterTemplate, error)
+	RegisterUpdatedTemplate(ctx context.Context, arg RegisterUpdatedTemplateParams) (FilterTemplate, error)
 	RotateListToken(ctx context.Context, arg RotateListTokenParams) error
 	UpdateInstanceForUserAndFilter(ctx context.Context, arg UpdateInstanceForUserAndFilterParams) error
 }

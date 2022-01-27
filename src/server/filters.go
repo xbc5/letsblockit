@@ -308,3 +308,47 @@ func (s *Server) hasMissingParams(instance db.GetActiveFiltersForUserRow) bool {
 
 	return false
 }
+
+func (s *Server) registerFilterTemplates() error {
+	// Create a dummy echo request to open a transaction with context.Background
+	r, err := http.NewRequest("", "", nil)
+	if err != nil {
+		return fmt.Errorf("failed to created dummy request: %w", err)
+	}
+	c := s.echo.NewContext(r, nil)
+
+	// Check the registered filter templates and register new / updated templates
+	return s.store.RunTx(c, func(ctx context.Context, q db.Querier) error {
+		registered := make(map[string]db.FilterTemplate, len(s.filters.GetFilters()))
+		registeredList, e := q.GetFilterTemplates(ctx)
+		if e != nil {
+			return e
+		}
+		for _, t := range registeredList {
+			registered[t.FilterName] = t
+		}
+
+		for _, f := range s.filters.GetFilters() {
+			hash := f.TemplateHash()
+			existing, found := registered[f.Name]
+			if !found {
+				if registered[f.Name], e = q.RegisterNewTemplate(ctx, db.RegisterNewTemplateParams{
+					FilterName:   f.Name,
+					TemplateHash: hash,
+				}); e != nil {
+					return e
+				}
+				_ = s.statsd.Incr("letsblockit.template_changes", []string{"type:new"}, 1)
+			} else if existing.TemplateHash != hash {
+				if registered[f.Name], e = q.RegisterUpdatedTemplate(ctx, db.RegisterUpdatedTemplateParams{
+					ID:           existing.ID,
+					TemplateHash: hash,
+				}); e != nil {
+					return e
+				}
+				_ = s.statsd.Incr("letsblockit.template_changes", []string{"type:updated"}, 1)
+			}
+		}
+		return nil
+	})
+}

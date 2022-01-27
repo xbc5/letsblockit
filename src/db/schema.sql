@@ -38,3 +38,12 @@ CREATE TABLE banned_users
     lifted_at   timestamp,
     lift_reason text
 );
+
+CREATE TABLE filter_templates
+(
+    id            SERIAL PRIMARY KEY,
+    filter_name   text      NOT NULL,
+    template_hash integer   NOT NULL,
+    created_at    timestamp NOT NULL DEFAULT NOW(),
+    updated_at    timestamp NOT NULL DEFAULT NOW()
+);

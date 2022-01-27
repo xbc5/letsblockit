@@ -37,3 +37,11 @@ type FilterList struct {
 	Downloaded   bool
 	DownloadedAt sql.NullTime
 }
+
+type FilterTemplate struct {
+	ID           int32
+	FilterName   string
+	TemplateHash int32
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}

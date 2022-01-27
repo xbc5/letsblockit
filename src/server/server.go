@@ -104,6 +104,9 @@ func (s *Server) Start() error {
 		s.statsd = &statsd.NoOpClient{}
 	}
 
+	if err := s.registerFilterTemplates(); err != nil {
+		return err
+	}
 	s.pages.RegisterHelpers(buildHelpers(s.echo, s.assets.hash))
 	s.setupRouter()
 	if s.options.DryRun {

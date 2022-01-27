@@ -1,5 +1,7 @@
 package filters
 
+import "github.com/DataDog/mmh3"
+
 var filenameSuffix = ".yaml"
 var yamlSeparator = []byte("\n---")
 var newLine = []byte("\n")
@@ -59,4 +61,8 @@ func (f *Filter) HasTag(tag string) bool {
 		}
 	}
 	return false
+}
+
+func (f *Filter) TemplateHash() int32 {
+	return int32(mmh3.Hash32([]byte(f.Template)))
 }

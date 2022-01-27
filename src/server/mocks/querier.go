@@ -140,6 +140,21 @@ func (mr *MockQuerierMockRecorder) GetBannedUsers(ctx interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBannedUsers", reflect.TypeOf((*MockQuerier)(nil).GetBannedUsers), ctx)
 }
 
+// GetFilterTemplates mocks base method.
+func (m *MockQuerier) GetFilterTemplates(ctx context.Context) ([]db.FilterTemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFilterTemplates", ctx)
+	ret0, _ := ret[0].([]db.FilterTemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFilterTemplates indicates an expected call of GetFilterTemplates.
+func (mr *MockQuerierMockRecorder) GetFilterTemplates(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilterTemplates", reflect.TypeOf((*MockQuerier)(nil).GetFilterTemplates), ctx)
+}
+
 // GetInstanceForUserAndFilter mocks base method.
 func (m *MockQuerier) GetInstanceForUserAndFilter(ctx context.Context, arg db.GetInstanceForUserAndFilterParams) (pgtype.JSONB, error) {
 	m.ctrl.T.Helper()
@@ -257,6 +272,36 @@ func (m *MockQuerier) MarkListDownloaded(ctx context.Context, id int32) error {
 func (mr *MockQuerierMockRecorder) MarkListDownloaded(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MarkListDownloaded", reflect.TypeOf((*MockQuerier)(nil).MarkListDownloaded), ctx, id)
+}
+
+// RegisterNewTemplate mocks base method.
+func (m *MockQuerier) RegisterNewTemplate(ctx context.Context, arg db.RegisterNewTemplateParams) (db.FilterTemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterNewTemplate", ctx, arg)
+	ret0, _ := ret[0].(db.FilterTemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterNewTemplate indicates an expected call of RegisterNewTemplate.
+func (mr *MockQuerierMockRecorder) RegisterNewTemplate(ctx, arg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterNewTemplate", reflect.TypeOf((*MockQuerier)(nil).RegisterNewTemplate), ctx, arg)
+}
+
+// RegisterUpdatedTemplate mocks base method.
+func (m *MockQuerier) RegisterUpdatedTemplate(ctx context.Context, arg db.RegisterUpdatedTemplateParams) (db.FilterTemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterUpdatedTemplate", ctx, arg)
+	ret0, _ := ret[0].(db.FilterTemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterUpdatedTemplate indicates an expected call of RegisterUpdatedTemplate.
+func (mr *MockQuerierMockRecorder) RegisterUpdatedTemplate(ctx, arg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUpdatedTemplate", reflect.TypeOf((*MockQuerier)(nil).RegisterUpdatedTemplate), ctx, arg)
 }
 
 // RotateListToken mocks base method.
