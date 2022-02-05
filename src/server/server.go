@@ -60,15 +60,16 @@ var navigationLinks = []struct {
 }}
 
 type Server struct {
-	assets  *wrappedAssets
-	echo    *echo.Echo
-	options *Options
-	filters FilterRepository
-	pages   PageRenderer
-	store   db.Store
-	statsd  statsd.ClientInterface
-	banned  map[uuid.UUID]struct{}
-	now     func() time.Time
+	assets     *wrappedAssets
+	echo       *echo.Echo
+	options    *Options
+	filters    FilterRepository
+	filterInfo *filterInfo
+	pages      PageRenderer
+	store      db.Store
+	statsd     statsd.ClientInterface
+	banned     map[uuid.UUID]struct{}
+	now        func() time.Time
 }
 
 func NewServer(options *Options) *Server {
@@ -92,19 +93,20 @@ func (s *Server) Start() error {
 		},
 	})
 
+	var err error
 	if s.options.Statsd != "" {
-		dsd, err := statsd.New(s.options.Statsd)
+		s.statsd, err = statsd.New(s.options.Statsd)
 		if err != nil {
 			return err
 		}
-		s.statsd = dsd
-		s.echo.Use(buildDogstatsMiddleware(dsd))
-		go collectStats(s.echo.Logger, s.store, dsd)
+		s.echo.Use(buildDogstatsMiddleware(s.statsd))
+		go collectStats(s.echo.Logger, s.store, s.statsd)
 	} else {
 		s.statsd = &statsd.NoOpClient{}
 	}
 
-	if err := s.registerFilterTemplates(); err != nil {
+	s.filterInfo, err = s.buildFilterInfo()
+	if err != nil {
 		return err
 	}
 	s.pages.RegisterHelpers(buildHelpers(s.echo, s.assets.hash))
@@ -276,7 +278,7 @@ func buildDogstatsMiddleware(dsd statsd.ClientInterface) echo.MiddlewareFunc {
 	}
 }
 
-func collectStats(log echo.Logger, store db.Store, dsd *statsd.Client) {
+func collectStats(log echo.Logger, store db.Store, dsd statsd.ClientInterface) {
 	collect := func() {
 		stats, err := store.GetStats(context.Background())
 		if err != nil {
